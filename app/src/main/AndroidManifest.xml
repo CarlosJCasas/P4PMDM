@@ -24,11 +24,19 @@
         </activity>
 
         <activity android:name=".UI.DetallesActivity"
+            android:label="Post"
             android:parentActivityName=".UI.MainActivity">
 
         </activity>
 
         <activity android:name=".UI.ModificarActivity"
+            android:label="Modificar"
+            android:parentActivityName=".UI.MainActivity">
+
+        </activity>
+
+        <activity android:name=".UI.DatosAutor"
+            android:label="Autor"
             android:parentActivityName=".UI.MainActivity">
 
         </activity>

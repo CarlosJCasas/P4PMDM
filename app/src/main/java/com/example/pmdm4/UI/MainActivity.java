@@ -1,5 +1,6 @@
 package com.example.pmdm4.UI;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -10,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -33,10 +35,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.function.UnaryOperator;
 
 public class MainActivity extends AppCompatActivity implements CustomAdapter.ItemClickListener {
     public static ArrayList<Post> listaPosts = new ArrayList<>();
     private ArrayList<User> listaUsers = new ArrayList<>();
+    private ArrayList<Post> listaPostOriginal = new ArrayList<>();
     private final ArrayList<UsersAndPosts> listaUserPosts = new ArrayList<>();
     private RequestQueue requestQueue;
     private PostsLab myLab;
@@ -60,7 +64,6 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter.Ite
          */
 
         //Rellenamos las listas con los datos obtenidos de la base de datos
-
         listaPosts = (ArrayList<Post>) myLab.getPosts();
         listaUsers = (ArrayList<User>) myLab.getUsers();
 
@@ -81,89 +84,29 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter.Ite
     @Override
     protected void onResume() {
         super.onResume();
-        if (control) {
-            adaptador.notifyDataSetChanged();
-        }
-    }
-
-    //Recibe los datos de los USERS
-    public void recibirDatosUsers() {
-        //Crear las request para meter los datos en las listas
-        for (int numUser = 1; numUser < 6; numUser++) {
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, SplashActivity.USERURL.concat(String.valueOf(numUser)), null, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    //Aqui recibir todos los datos del response
-                    try {
-                        int id = response.getInt("id");
-                        String name = response.getString("name");
-                        String username = response.getString("username");
-                        String email = response.getString("email");
-                        String phone = response.getString("phone");
-                        JSONObject company = response.getJSONObject("company");
-                        String companyName = company.getString("name");
-                        User user = new User(id, name, username, email, companyName, phone);
-                        //Añadir a la base de datos
-                        myLab.addUser(user);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        Toast.makeText(MainActivity.this, "ERROR AL RECIBIR DATOS DE LA URL", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    error.printStackTrace();
-                    Toast.makeText(MainActivity.this, "No se han podido obtener los datos de la Url " + SplashActivity.USERURL, Toast.LENGTH_SHORT).show();
-                }
-            });
-            requestQueue.add(jsonObjectRequest);
-        }
-    }
-
-    //Recibe los datos de los POSTS
-    public void recibirDatosPosts() {
-        //Crear las request para meter los datos en las listas
-
-        for (int numPost = 1; numPost < 51; numPost++) {
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, SplashActivity.POSTURL.concat(String.valueOf(numPost)), null, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    //Aqui recibir todos los datos del response
-                    try {
-                        String title = response.getString("title");
-                        String body = response.getString("body");
-                        int userId = response.getInt("userId");
-                        Post post = new Post(title, body, userId);
-                        //Add a la base de datos
-                        myLab.addPost(post);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        Toast.makeText(MainActivity.this, "ERROR AL RECIBIR DATOS DE LA URL", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    error.printStackTrace();
-                    Toast.makeText(MainActivity.this, "No se han podido obtener los datos de la Url " + SplashActivity.POSTURL, Toast.LENGTH_SHORT).show();
-                }
-            });
-            requestQueue.add(jsonObjectRequest);
-        }
+        adaptador.notifyDataSetChanged();
     }
 
     //Borra todos los datos y los recupera
     public void resetearDatos() {
         // TODO Añadir un cuadro de texto de confirmacion y en el onClick eliminar todos los datos llamar a la Splash y que vuelva a empezar, reiniciar la app.
         //Elimina todos los datos de la base de datos
-        myLab.deleteAllPosts();
-        myLab.deleteAllUers();
-
-        //Volver a añadir los datos a las listas
-        listaPosts = (ArrayList<Post>) myLab.getPosts();
-        listaUsers = (ArrayList<User>) myLab.getUsers();
-
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("¿Quieres resetear todos los datos?");
+        builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //Deberia cambiar la lista por la antigua y la base de datos
+                myLab.deleteAllPosts();
+                for(Post post : listaPostOriginal){
+                    myLab.addPost(post);
+                }
+                listaPosts = listaPostOriginal;
+                adaptador.notifyDataSetChanged();
+            }
+        });
+        builder.setNegativeButton("Cancelar", null);
+        builder.create().show();
     }
 
     //Poner la primera letra en mayuscula
@@ -176,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter.Ite
     //Llama a la actividad añadir
     public void launchAddActivity(View view) {
         Intent intent = new Intent(MainActivity.this, AddActivity.class);
-        startActivityForResult(intent, 1);
+        startActivityForResult(intent, 2);
     }
 
     //Recibir los datos de las activities segun el codigo resultado
@@ -193,6 +136,12 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter.Ite
             case 3:
                 //Recibir los datos modificar
 
+                break;
+            case 4:
+                data.getIntExtra("idUpdated", 1);
+                listaPosts.clear();
+                listaPosts = (ArrayList<Post>) myLab.getPosts();
+                adaptador.notifyDataSetChanged();
                 break;
         }
     }
@@ -226,9 +175,13 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter.Ite
                 break;
             case (R.id.resetear):
                 resetearDatos();
-                adaptador.notifyDataSetChanged();
+
+                break;
+            case (R.id.anhadir):
+                launchAddActivity(item.getActionView());
                 break;
         }
+        adaptador.notifyDataSetChanged();
         return super.onOptionsItemSelected(item);
     }
 
@@ -240,10 +193,14 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter.Ite
         switch (item.getItemId()) {
             case (111):
                 //Abrir la activity de autor
+                Post postAutor = listaPosts.get(item.getGroupId());
+                int idAutor = postAutor.getUserId();
+                Intent intentAutor = new Intent(MainActivity.this, DatosAutor.class);
+                intentAutor.putExtra("idAutor", idAutor);
+                startActivity(intentAutor);
                 return true;
             case (112):
                 //Abrir la activity de modificar
-
                 int position = item.getGroupId();
                 Post post = listaPosts.get(position);
                 Intent intent = new Intent(MainActivity.this, ModificarActivity.class);
@@ -251,18 +208,51 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter.Ite
                 intent.putExtra("titulo", post.getTitle());
                 intent.putExtra("body", post.getBody());
                 intent.putExtra("autor", post.getUserId());
-                startActivity(intent);
-
+                startActivityForResult(intent, 4);
+                adaptador.notifyDataSetChanged();
                 return true;
 
             case (113):
                 //Eliminar el item concreto
+                int idPosts = item.getGroupId();
+                Post postEliminar = listaPosts.get(idPosts);
+                int idBd = postEliminar.getId();
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("¿Eliminar?");
+                builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE,
+                                SplashActivity.POSTURL.concat(String.valueOf(idBd)),
+                                null,
+                                new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                Toast.makeText(MainActivity.this, "Post "+ SplashActivity.POSTURL.concat(String.valueOf(idBd))+ " ha sido eliminado", Toast.LENGTH_SHORT).show();
+                                //Eliminar POST
+                                myLab.deletePost(postEliminar);
+                                listaPosts.remove(idPosts);
+                                adaptador.notifyDataSetChanged();
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                error.printStackTrace();
+                                Toast.makeText(MainActivity.this, "Eliminar no funciona", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        requestQueue.add(jsonObjectRequest);
+                    }
+                });
+                builder.setNegativeButton("Cancelar", null);
+                builder.create().show();
                 return true;
             default:
                 return super.onContextItemSelected(item);
         }
     }
 
+    //OnItemClick muestra los detalles de la posición donde hace click
     @Override
     public void onItemCLick(View view, int position) {
         //TODO tiene que abrir la descripcion
@@ -279,5 +269,24 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter.Ite
 
     }
 
+    //Elimina post pero aun no lo uso
+    public void eliminarPost(int id){
+
+        //Eliminar el dato de la API y de la base de datos
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE, SplashActivity.POSTURL.concat(String.valueOf(id)), null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Toast.makeText(MainActivity.this, "Post "+ SplashActivity.POSTURL.concat(String.valueOf(id))+ " ha sido eliminado", Toast.LENGTH_SHORT).show();
+                //Eliminar POST
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+
+    }
 
 }

@@ -41,6 +41,11 @@ public class ModificarActivity  extends AppCompatActivity {
     private PostsLab myLab;
     private int idAutor;
 
+    private String tituloEnviar;
+    private String bodyEnviar;
+    private int userIdEnviar;
+
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,67 +85,81 @@ public class ModificarActivity  extends AppCompatActivity {
 
             }
         });
-        String tituloEnviar;
-        String bodyEnviar;
-        int userIdEnviar;
-        //Recogemos todos los datos de los ED y Spinner
-        if(tituloEd.getText().toString().isEmpty()){
-            //Enviar titulo
-            tituloEnviar = titulo;
-        }else{
-            tituloEnviar = tituloEd.getText().toString();
-        }
-        if(cuerpoEd.getText().toString().isEmpty()){
-            bodyEnviar = cuerpo;
-        }else {
-            bodyEnviar = cuerpoEd.getText().toString();
-        }
-        userIdEnviar = idAutor;
-
-
 
         addButtton = findViewById(R.id.button_aceptar_add);
         addButtton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Mandar la modificacion a la API PUT
-                RequestQueue requestQueue = Volley.newRequestQueue(ModificarActivity.this);
-                JSONObject jsonObject = new JSONObject();
-                try {
-                    jsonObject.put("id", idPost);
-                    jsonObject.put("title", tituloEnviar);
-                    jsonObject.put("body", bodyEnviar);
-                    jsonObject.put("userId", userIdEnviar);
-                    JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.PUT, SplashActivity.POSTURL, jsonObject, new Response.Listener<JSONObject>() {
-                        /*
-                        Ver que cojones pasa aqui... ¡¡¡¡¡¡¡¡¡ALARM!!!!!!!!
-                         */
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            //Recibo los datos de la API y modifico la BD
-                            try {
-                                String tituloUpdate = response.getString("title");
-                                String bodyUpdate = response.getString("body");
-                                int userUpdate = response.getInt("userId");
-                                Post post = new Post(tituloUpdate, bodyUpdate, userUpdate);
-                                myLab.updatePost(post);
-                                listaPost = (ArrayList<Post>) myLab.getPosts();
-                                MainActivity.listaPosts.replaceAll((UnaryOperator<Post>) listaPost);
-                                MainActivity.adaptador.notifyDataSetChanged();
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
+                //Recogemos todos los datos de los ED y Spinner
+                if(tituloEd.getText().toString().isEmpty()){
+                    //Enviar titulo
+                    tituloEnviar = titulo;
+                }else{
+                    tituloEnviar = tituloEd.getText().toString();
+                }
+                if(cuerpoEd.getText().toString().isEmpty()){
+                    bodyEnviar = cuerpo;
+                }else {
+                    bodyEnviar = cuerpoEd.getText().toString();
+                }
+                userIdEnviar = idAutor;
+                if(idPost>=100){
+                    Post post = new Post(idPost, tituloEnviar, bodyEnviar, userIdEnviar);
+                    myLab.updatePost(post);
+                    Intent intent1 = new Intent();
+                    intent1.putExtra("idUpdated", idPost);
+                    intent1.putExtra("titleUpdate", tituloEnviar);
+                    intent1.putExtra("bodyUpdate", bodyEnviar);
+                    intent1.putExtra("userIdUpdated", userIdEnviar);
+                    setResult(4,intent1);
 
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(ModificarActivity.this, "No se han podido modificar los datos a la URL " + SplashActivity.POSTURL, Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    requestQueue.add(jsonObjectRequest);
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                }else{
+                    //Mandar la modificacion a la API PUT
+                    RequestQueue requestQueue = Volley.newRequestQueue(ModificarActivity.this);
+                    JSONObject jsonObject = new JSONObject();
+                    try {
+                        jsonObject.put("id",idPost);
+                        jsonObject.put("title", tituloEnviar);
+                        jsonObject.put("body", bodyEnviar);
+                        jsonObject.put("userId", userIdEnviar);
+                        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.PUT,
+                                SplashActivity.POSTURL.concat(String.valueOf(idPost)), jsonObject, new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                //Recibo los datos de la API y modifico la BD
+                                try {
+                                    int idUpdate = response.getInt("id");
+                                    String tituloUpdate = response.getString("title");
+                                    String bodyUpdate = response.getString("body");
+                                    int userUpdate = response.getInt("userId");
+                                    Post post = new Post(idUpdate, tituloUpdate, bodyUpdate, userUpdate);
+                                    //No actualiza esta movida
+                                    myLab.updatePost(post);
+                                    Intent intent1 = new Intent();
+                                    intent1.putExtra("idUpdated", idUpdate);
+                                    intent1.putExtra("titleUpdate", tituloUpdate);
+                                    intent1.putExtra("bodyUpdate", bodyUpdate);
+                                    intent1.putExtra("userIdUpdated", userUpdate);
+                                    setResult(4,intent1);
+                                    listaPost = (ArrayList<Post>) myLab.getPosts();
+                                    MainActivity.listaPosts.clear();
+                                    MainActivity.listaPosts.addAll(listaPost);
+                                    MainActivity.adaptador.notifyDataSetChanged();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Toast.makeText(ModificarActivity.this, "No se han podido modificar los datos a la URL " + SplashActivity.POSTURL, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        requestQueue.add(jsonObjectRequest);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
                 finish();
             }

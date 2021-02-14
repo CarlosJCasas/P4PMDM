@@ -5,14 +5,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginEnd="25dp"
-    android:layout_marginStart="25dp">
+    android:paddingStart="25dp"
+    android:paddingEnd="25dp"
+    android:background="@drawable/finalcontransparencia"
+    >
 
     <TextView
         android:id="@+id/titulo_post_addact"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="42dp"
+        android:textColor="@color/white"
         android:text="Título"
         android:textSize="25sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -33,6 +36,8 @@
     <EditText
         android:id="@+id/titulo_editText"
         android:layout_width="0dp"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/white"
         android:layout_height="wrap_content"
         android:layout_marginStart="19dp"
         android:layout_marginTop="35dp"
@@ -45,6 +50,7 @@
     <EditText
         android:id="@+id/cuerpo_editText"
         android:layout_width="match_parent"
+        android:textColor="@color/white"
         android:layout_height="0dp"
         android:layout_marginTop="34dp"
         android:layout_marginBottom="150dp"
@@ -63,6 +69,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="37dp"
         android:text="Autor"
+        android:textColor="@color/white"
         android:textSize="25sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/titulo_post_addact" />
@@ -75,6 +82,7 @@
         android:layout_marginEnd="40dp"
         android:onClick="onClick"
         android:text="Añadir"
+        android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/button_cancelar_add"
         app:layout_constraintTop_toBottomOf="@+id/cuerpo_editText" />
@@ -86,6 +94,7 @@
         android:layout_marginStart="40dp"
         android:layout_marginTop="48dp"
         android:layout_marginEnd="50dp"
+        android:textColor="@color/white"
         android:onClick="onClick"
         android:text="Cancelar"
         app:layout_constraintEnd_toStartOf="@+id/button_aceptar_add"

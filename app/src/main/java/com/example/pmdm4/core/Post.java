@@ -13,6 +13,7 @@ import static androidx.room.ForeignKey.CASCADE;
 @Entity(tableName = "post")
 public class Post {
     @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id")
     private int id;
     @ColumnInfo(name = "title")
     private String title;

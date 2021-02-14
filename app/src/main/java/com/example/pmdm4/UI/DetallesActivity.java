@@ -31,7 +31,7 @@ public class DetallesActivity extends AppCompatActivity {
 
         tituloPost.setText(MainActivity.capitalizarPrimeraletra(titulo));
         nombreAutor.setText(autor);
-        cuerpoPost.setText(body);
+        cuerpoPost.setText(MainActivity.capitalizarPrimeraletra(body));
 
     }
 }

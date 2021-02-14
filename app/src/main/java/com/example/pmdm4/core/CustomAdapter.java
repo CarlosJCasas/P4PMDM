@@ -53,11 +53,13 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         //Obtener la lista y colocarla en la CardView
         //La posicion 1 es el usuario y la 2 el titulo
-//        MainActivity.capitalizarPrimeraletra(listaPosts.get(position).getTitle());
-//        String tituloMayus = listaPosts.get(position).getTitle();
-//        tituloMayus = tituloMayus.substring(0,1).toUpperCase()+tituloMayus.substring(1);
         holder.titulo.setText(MainActivity.capitalizarPrimeraletra(listaPosts.get(position).getTitle()));
         holder.autor.setText(listaUsers.get(listaPosts.get(position).getUserId() - 1).getName());
+    }
+
+    public void updateList(ArrayList<Post> listaDePost){
+        listaPosts.clear();
+        listaPosts.addAll(listaDePost);
     }
 
     @Override
@@ -79,11 +81,9 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
             } else {
                 //TODO ver como hacer para que busque
                 for (Post post : listaPostAll) {
-                    for (User user : listaUsers) {
-                        if (post.getTitle().toLowerCase().contains(constraint.toString().toLowerCase()) || user.getName().toLowerCase().contains((constraint.toString().toLowerCase()))) {
-                            if (!listaFiltrada.contains(post)) {
-                                listaFiltrada.add(post);
-                            }
+                    if (post.getTitle().toLowerCase().contains(constraint.toString().toLowerCase())) {
+                        if (!listaFiltrada.contains(post)) {
+                            listaFiltrada.add(post);
                         }
                     }
                 }

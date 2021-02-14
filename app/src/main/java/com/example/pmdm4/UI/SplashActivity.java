@@ -22,11 +22,16 @@ import com.example.pmdm4.core.User;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SplashActivity extends AppCompatActivity {
     public static final String USERURL = "https://jsonplaceholder.typicode.com/users/";
     public static final String POSTURL = "https://jsonplaceholder.typicode.com/posts/";
     public PostsLab myLab;
+    public static List<Post> listaDePosts = new ArrayList<>();
     private RequestQueue requestQueue;
+    private boolean control = true;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -35,14 +40,17 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.splash);
         myLab = PostsLab.get(getApplicationContext());
         requestQueue = Volley.newRequestQueue(getApplicationContext());
-
-        if (myLab.getPosts().isEmpty() && myLab.getUsers().isEmpty()) {
-            recibirDatosUsers();
-            recibirDatosPosts();
-        }
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (myLab.getPosts().isEmpty() && myLab.getUsers().isEmpty()) {
+                    recibirDatosUsers();
+                    recibirDatosPosts();
+                }
+            }
+        }, 1000);
 
         //Poner un contador de 50 para cuando se libera el splash
-
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -52,13 +60,15 @@ public class SplashActivity extends AppCompatActivity {
         }, 3000);
     }
 
-
     //Recibes los datos de de los USERS de la URL
     public void recibirDatosUsers() {
         //Crear las request para meter los datos en las listas
 
         for (int numUser = 1; numUser < 6; numUser++) {
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, USERURL.concat(String.valueOf(numUser)), null, new Response.Listener<JSONObject>() {
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET,
+                    USERURL.concat(String.valueOf(numUser)),
+                    null,
+                    new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
                     //Aqui recibir todos los datos del response
@@ -73,6 +83,7 @@ public class SplashActivity extends AppCompatActivity {
                         User user = new User(id, name, username, email, companyName, phone);
                         //Añadir a la base de datos
                         myLab.addUser(user);
+                        control = false;
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Toast.makeText(SplashActivity.this, "ERROR AL RECIBIR DATOS DE LA URL", Toast.LENGTH_SHORT).show();
@@ -86,13 +97,13 @@ public class SplashActivity extends AppCompatActivity {
                 }
             });
             requestQueue.add(jsonObjectRequest);
+
         }
     }
 
     //Recibes los datos de de los POSTS de la URL
     public void recibirDatosPosts() {
         //Crear las request para meter los datos en las listas
-
         for (int numPost = 1; numPost < 51; numPost++) {
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, POSTURL.concat(String.valueOf(numPost)), null, new Response.Listener<JSONObject>() {
                 @Override
@@ -105,7 +116,7 @@ public class SplashActivity extends AppCompatActivity {
                         Post post = new Post(title, body, userId);
                         //Add a la base de datos
                         myLab.addPost(post);
-
+                        control = false;
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -120,6 +131,7 @@ public class SplashActivity extends AppCompatActivity {
                 }
             });
             requestQueue.add(jsonObjectRequest);
+
         }
     }
 }
