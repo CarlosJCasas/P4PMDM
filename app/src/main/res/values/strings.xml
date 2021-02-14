@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Posts</string>
+    <string name="confirmar_reset">¿Quieres resetear todos los datos?</string>
+    <string name="aceptar">Aceptar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="error_modificar">\"No se han podido modificar los datos a la URL \"</string>
 </resources>

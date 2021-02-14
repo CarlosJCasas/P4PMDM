@@ -57,10 +57,6 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
         holder.autor.setText(listaUsers.get(listaPosts.get(position).getUserId() - 1).getName());
     }
 
-    public void updateList(ArrayList<Post> listaDePost){
-        listaPosts.clear();
-        listaPosts.addAll(listaDePost);
-    }
 
     @Override
     public int getItemCount() {
@@ -79,7 +75,6 @@ public class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.ViewHolder
             if (constraint.toString().isEmpty()) {
                 listaFiltrada.addAll(listaPostAll);
             } else {
-                //TODO ver como hacer para que busque
                 for (Post post : listaPostAll) {
                     if (post.getTitle().toLowerCase().contains(constraint.toString().toLowerCase())) {
                         if (!listaFiltrada.contains(post)) {

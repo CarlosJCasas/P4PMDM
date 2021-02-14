@@ -29,9 +29,7 @@ public class SplashActivity extends AppCompatActivity {
     public static final String USERURL = "https://jsonplaceholder.typicode.com/users/";
     public static final String POSTURL = "https://jsonplaceholder.typicode.com/posts/";
     public PostsLab myLab;
-    public static List<Post> listaDePosts = new ArrayList<>();
     private RequestQueue requestQueue;
-    private boolean control = true;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -83,7 +81,6 @@ public class SplashActivity extends AppCompatActivity {
                         User user = new User(id, name, username, email, companyName, phone);
                         //Añadir a la base de datos
                         myLab.addUser(user);
-                        control = false;
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Toast.makeText(SplashActivity.this, "ERROR AL RECIBIR DATOS DE LA URL", Toast.LENGTH_SHORT).show();
@@ -116,8 +113,6 @@ public class SplashActivity extends AppCompatActivity {
                         Post post = new Post(title, body, userId);
                         //Add a la base de datos
                         myLab.addPost(post);
-                        control = false;
-
                     } catch (JSONException e) {
                         e.printStackTrace();
                         Toast.makeText(SplashActivity.this, "ERROR AL RECIBIR DATOS DE LA URL", Toast.LENGTH_SHORT).show();

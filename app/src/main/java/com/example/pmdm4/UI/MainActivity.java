@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -31,11 +30,9 @@ import com.example.pmdm4.core.User;
 import com.example.pmdm4.core.UsersAndPosts;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.function.UnaryOperator;
 
 public class MainActivity extends AppCompatActivity implements CustomAdapter.ItemClickListener {
     public static ArrayList<Post> listaPosts = new ArrayList<>();
@@ -68,17 +65,12 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter.Ite
         listaUsers = (ArrayList<User>) myLab.getUsers();
 
         adaptador = new CustomAdapter(MainActivity.this, listaPosts);
-        adaptador.setClickListener(this::onItemCLick);
+        adaptador.setClickListener(this);
         registerForContextMenu(recyclerView);
         recyclerView.setAdapter(adaptador);
 
         FloatingActionButton addButton = findViewById(R.id.bottonAdd);
-        addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                launchAddActivity(v);
-            }
-        });
+        addButton.setOnClickListener(this::launchAddActivity);
     }
 
     @Override
@@ -92,20 +84,17 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter.Ite
         // TODO Añadir un cuadro de texto de confirmacion y en el onClick eliminar todos los datos llamar a la Splash y que vuelva a empezar, reiniciar la app.
         //Elimina todos los datos de la base de datos
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("¿Quieres resetear todos los datos?");
-        builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                //Deberia cambiar la lista por la antigua y la base de datos
-                myLab.deleteAllPosts();
-                for(Post post : listaPostOriginal){
-                    myLab.addPost(post);
-                }
-                listaPosts = listaPostOriginal;
-                adaptador.notifyDataSetChanged();
+        builder.setMessage(R.string.confirmar_reset);
+        builder.setPositiveButton(R.string.aceptar, (dialog, which) -> {
+            //Deberia cambiar la lista por la antigua y la base de datos
+            myLab.deleteAllPosts();
+            for(Post post : listaPostOriginal){
+                myLab.addPost(post);
             }
+            listaPosts = listaPostOriginal;
+            adaptador.notifyDataSetChanged();
         });
-        builder.setNegativeButton("Cancelar", null);
+        builder.setNegativeButton(R.string.cancelar, null);
         builder.create().show();
     }
 
@@ -219,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter.Ite
                 int idBd = postEliminar.getId();
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setMessage("¿Eliminar?");
-                builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(R.string.aceptar, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE,
@@ -244,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter.Ite
                         requestQueue.add(jsonObjectRequest);
                     }
                 });
-                builder.setNegativeButton("Cancelar", null);
+                builder.setNegativeButton(R.string.cancelar, null);
                 builder.create().show();
                 return true;
             default:
@@ -269,24 +258,5 @@ public class MainActivity extends AppCompatActivity implements CustomAdapter.Ite
 
     }
 
-    //Elimina post pero aun no lo uso
-    public void eliminarPost(int id){
-
-        //Eliminar el dato de la API y de la base de datos
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.DELETE, SplashActivity.POSTURL.concat(String.valueOf(id)), null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                Toast.makeText(MainActivity.this, "Post "+ SplashActivity.POSTURL.concat(String.valueOf(id))+ " ha sido eliminado", Toast.LENGTH_SHORT).show();
-                //Eliminar POST
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-
-    }
 
 }

@@ -153,7 +153,7 @@ public class ModificarActivity  extends AppCompatActivity {
                         }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                Toast.makeText(ModificarActivity.this, "No se han podido modificar los datos a la URL " + SplashActivity.POSTURL, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ModificarActivity.this, getString(R.string.error_modificar) + SplashActivity.POSTURL, Toast.LENGTH_SHORT).show();
                             }
                         });
                         requestQueue.add(jsonObjectRequest);
